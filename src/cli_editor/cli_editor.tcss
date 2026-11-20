@@ -1,0 +1,188 @@
+Screen {
+    layout: vertical;
+    background: #121212;
+}
+
+#main {
+    height: 1fr;
+    background: #121212;
+}
+
+#tree-pane {
+    width: 34;
+    min-width: 20;
+    background: #121212;
+    border-right: solid $primary;
+}
+
+#tree-pane DirectoryTree,
+#tree-pane Tree {
+    background: #121212;
+}
+
+#tree-pane #tree-filter {
+    height: 3;
+}
+
+#tree-pane #tree,
+#tree-pane #filter-tree {
+    height: 1fr;
+}
+
+#right {
+    width: 1fr;
+    height: 1fr;
+    background: #121212;
+}
+
+#editor-area {
+    height: 1fr;
+    background: #121212;
+}
+
+#tabs {
+    height: 3;
+    background: #121212;
+}
+
+#editors {
+    height: 1fr;
+    background: #121212;
+}
+
+#editors Editor {
+    background: #121212;
+    color: #e6e6e6;
+}
+
+.empty-editor {
+    width: 1fr;
+    height: 1fr;
+    content-align: center middle;
+    background: #121212;
+    color: $text-muted;
+}
+
+ModalScreen {
+    background: #121212;
+}
+
+#find-bar {
+    height: 3;
+    dock: bottom;
+    background: #121212;
+}
+
+#find-bar #find-input {
+    width: 1fr;
+}
+
+#find-bar #find-count {
+    width: 12;
+    content-align: right middle;
+}
+
+#output-pane {
+    height: 12;
+    background: #121212;
+    border-top: solid $primary;
+}
+
+#output-title {
+    height: 1;
+    padding: 0 1;
+    background: $panel;
+    color: $text-muted;
+}
+
+#output {
+    height: 1fr;
+    padding: 0 1;
+    background: #121212;
+}
+
+#status-bar {
+    height: 1;
+    padding: 0 1;
+    background: $panel;
+    color: $text-muted;
+}
+
+Footer {
+    height: 1;
+}
+
+.modal-box {
+    width: 70%;
+    height: auto;
+    max-height: 80%;
+    padding: 1 2;
+    border: round $primary;
+    background: $surface;
+}
+
+.modal-box.wide {
+    width: 85%;
+    height: 75%;
+}
+
+.modal-title {
+    height: auto;
+    margin-bottom: 1;
+    text-style: bold;
+}
+
+.modal-hint {
+    height: auto;
+    margin-top: 1;
+    color: $text-muted;
+}
+
+.modal-buttons {
+    height: 3;
+    align: right middle;
+}
+
+.modal-buttons Button {
+    margin-left: 1;
+}
+
+#keymap-container {
+    width: 90%;
+    height: 85%;
+    padding: 1 2;
+    border: round $primary;
+    background: $surface;
+}
+
+#keymap-text {
+    height: auto;
+}
+
+#too-small {
+    display: none;
+    width: 1fr;
+    height: 1fr;
+    content-align: center middle;
+    text-align: center;
+    color: $text-muted;
+}
+
+Screen.-too-small #main,
+Screen.-too-small #output-pane,
+Screen.-too-small #status-bar,
+Screen.-too-small Footer {
+    display: none;
+}
+
+Screen.-too-small #too-small {
+    display: block;
+}
+
+Screen.-portrait #tree-pane {
+    width: 22;
+}
+
+Screen.-portrait #output-pane {
+    height: 8;
+}

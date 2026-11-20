@@ -46,27 +46,26 @@ src/cli_editor/
   keymap.py              # Binding tables and help text
   models.py              # BufferState, SessionState, language detection
   services/
-    files.py             # read/write/ignore rules/size checks
+    files.py             # read/write/ignore rules/size checks/search
     runner.py            # subprocess command selection and execution
     session.py           # load/save JSON session
-    search.py            # in-file and project search helpers
   widgets/
     file_tree.py         # FileTreePane + filter
     editor.py            # Editor(TextArea) with key overrides
+    input.py             # PromptInput (Ctrl-A select-all)
     tabs.py              # Tabs + ContentSwitcher management
     find_bar.py          # FindBar
     output.py            # OutputPane
     status_bar.py        # StatusBar
     keymap_overlay.py    # KeymapScreen(ModalScreen)
-    modals.py            # ConfirmScreen, PromptScreen
+    modals.py            # ConfirmScreen, PromptScreen, QuickOpenScreen, ProjectFindScreen
   cli_editor.tcss
 tests/
-  conftest.py
-  test_language_detection.py
+  test_models.py
   test_files.py
   test_session.py
   test_runner.py
-  test_editor_ui.py
+  test_app.py            # Pilot UI tests
   test_snapshots.py
 ```
 
@@ -131,9 +130,10 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 
 ### Sizing and theming
 
-- Tree default width: 30% of terminal, minimum 20 cells, maximum 50% of width. The divider is draggable.
-- If terminal is smaller than 60×20, replace the layout with a centered "Terminal too small" message.
-- Dark theme by default. `TextArea.code_editor(..., theme="monokai", show_line_numbers=True, soft_wrap=False)`.
+- Tree default width: 34 cells (session-restored). The divider is fixed; draggable resizing is deferred.
+- If terminal is smaller than 20×20, replace the layout with a centered "Terminal too small" message; restore the layout when the terminal grows. Portrait and landscape terminals are both supported; portrait mode uses a slightly narrower tree and shorter output panel.
+- Dark theme by default. `TextArea.code_editor(..., theme="css", show_line_numbers=True, soft_wrap=False, tab_behavior="indent")`.
+- If tree-sitter support is missing, open the file as plain text instead of failing.
 - TCSS defines borders, focus accent, status bar, find bar, and modal styling.
 
 ## 7. Authoritative keymap
@@ -163,7 +163,7 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 | `Ctrl-W` | Close active tab | yes |
 | `Ctrl-Tab` / `Ctrl-Shift-Tab` | Next/previous tab (fallback `Alt-Right`/`Alt-Left`) | yes |
 | `Ctrl-R` | Run active file | yes |
-| `Esc` | Stop running file | yes |
+| `Esc` | Stop running file / cancel mark mode | no (Editor handles it directly) |
 | `F2` | Rename selected file (tree focus) | no |
 | `Delete` | Delete selected file (tree focus) | no |
 
@@ -220,9 +220,10 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 - `Enter` on a directory toggles expansion; on a file opens it.
 - `Ctrl-F` in the tree reveals `Input#tree-filter`, focuses it, and filters as the user types:
   - Case-insensitive substring match on the file name.
-  - Show matching files plus their ancestor directories; auto-expand ancestors.
+  - Show matching files as flat relative paths (expandable ancestor hierarchy is deferred).
+  - Typing keeps focus in the filter input; `Up`/`Down` move the result cursor, and `Enter` opens the selected file.
   - `Esc` clears the filter, hides the input, and returns focus to the tree.
-  - Cap at 500 matches; show a "refine filter" notification if capped.
+  - Cap at 500 matches.
 - `Delete` on a file shows a confirmation modal. On confirm, delete the file, close its tab if open, and refresh the tree. Directories are not deletable in MVP.
 - `F2` on a file opens a prompt with the current name. Rename on disk; update the tab label, buffer path, and language; reject empty names, path separators, and existing targets.
 - Clicking a tree item selects it; double-clicking a file opens it (optional but preferred).
@@ -247,7 +248,7 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 
 ### 8.4 Editing
 
-- `Editor` is a `TextArea` subclass created with `Editor.code_editor(text=..., language=..., theme="monokai", show_line_numbers=True, soft_wrap=False, tab_behavior="indent")`.
+- `Editor` is a `TextArea` subclass created with `Editor.code_editor(text=..., language=..., theme="css", show_line_numbers=True, soft_wrap=False, tab_behavior="indent")`.
 - Language by extension:
 
 | Extension | Language |
@@ -336,7 +337,7 @@ Update on cursor/selection changes, text changes, tab activation, and run state 
   "tabs": [
     {"path": "/abs/project/src/app.py", "cursor": [11, 4], "scroll": [0, 20]}
   ],
-  "layout": {"tree_visible": true, "tree_width": 36}
+  "layout": {"tree_visible": true, "tree_width": 34}
 }
 ```
 
@@ -367,12 +368,12 @@ The `Editor` widget is the source of truth for current text. `BufferState.saved_
 Commands:
 
 ```bash
-uv sync --extra dev
+uv sync
 uv run python -m cli_editor
 uv run textual run --dev cli_editor.app:EditorApp
 uv run textual console            # second terminal
 uv run pytest
-uv run pytest tests/test_editor_ui.py::test_open_and_save
+uv run pytest tests/test_app.py::test_open_save_and_dirty_tab
 uv run pytest --snapshot-update   # only after visually reviewing snapshots
 uv run ruff check .
 ```
@@ -414,8 +415,10 @@ Required coverage:
 
 ## 13. Open decisions
 
-- HTML/CSS run behavior: this spec defaults to opening HTML in the browser and rejecting CSS. Confirm before implementation.
+- HTML/CSS run behavior is resolved: HTML opens in the default browser; CSS is rejected with an explanatory output message.
 - Clipboard over SSH: Textual's clipboard may not reach the local machine; OSC 52 support is optional.
 - User-configurable keybindings: deferred.
 - Draft recovery for unsaved buffers: deferred.
+- Draggable tree/editor divider and configurable pane width: deferred.
+- Find options (case-sensitive, whole word, regex): deferred.
 - Regex/case/whole-word options for search: deferred.

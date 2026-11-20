@@ -10,16 +10,30 @@
 ## Stack and Textual specifics
 
 - Use Textual's built-in widgets instead of hand-rolled equivalents: `DirectoryTree` for the left pane, `TextArea` for the editor pane.
-- Syntax highlighting needs the extra: `pip install "textual[syntax]"` (pulls in tree-sitter). Set `TextArea.language`, or use `TextArea.code_editor(language=...)`; `TextArea.available_languages` lists supported names.
-- Dev loop: run `textual run --dev app.py` and `textual console` in a second terminal. The `textual` CLI comes from `textual-dev`, not `textual`; `--dev` live-reloads TCSS (not Python).
-- Tests: pytest + pytest-asyncio with `asyncio_mode = auto`; drive the app with `async with app.run_test() as pilot`. Visual snapshots use `pytest-textual-snapshot`; only run `pytest --snapshot-update` after inspecting the generated SVG.
+- Syntax highlighting comes from `textual[syntax]` (pulls in tree-sitter). Set `TextArea.language`, or use `TextArea.code_editor(language=...)`; `TextArea.available_languages` lists supported names.
+- `tree-sitter` is pinned to `0.25.2` in `pyproject.toml`: `0.26.x` segfaults intermittently with the JavaScript grammar.
+- Dev loop: run `uv run textual run --dev cli_editor.app:EditorApp` and `uv run textual console` in a second terminal. The `textual` CLI comes from `textual-dev`, not `textual`; `--dev` live-reloads TCSS (not Python).
+- Tests: pytest + pytest-asyncio with `asyncio_mode = auto`; drive the app with `async with app.run_test() as pilot`. Visual snapshots use `pytest-textual-snapshot`; only run `pytest --snapshot-update` after inspecting the generated snapshots.
+
+## Toolchain
+
+```bash
+uv sync                                      # install app + dev tools
+uv run python -m cli_editor [path]           # run the app
+uv run textual run --dev cli_editor.app:EditorApp
+uv run textual console                       # second terminal
+uv run pytest                                # full suite
+uv run pytest tests/test_app.py::test_open_save_and_dirty_tab  # single test
+uv run pytest --snapshot-update              # only after reviewing snapshots
+uv run ruff check .
+```
 
 ## Repo state
 
-Docs-only for now: `README.md` defines the product and keymap, and `spec.md` is the build-ready implementation spec. No source, manifest, build/test/lint config, CI, or `opencode.json` yet; history is still the single `Initial commit` on `main`.
+Implemented MVP: `src/cli_editor/` contains the app, widgets, services, TCSS, and entry point; `tests/` contains unit, Pilot UI, and snapshot tests; `pyproject.toml` + `uv.lock` define the toolchain. `README.md` is the user-facing feature/keymap overview and `spec.md` is the implementation spec. No CI or `opencode.json` yet.
 
 ## Working here
 
 - **Wait for `GO`.** Before writing or modifying code, present a short spec: goal, files to add/change, approach, dependencies, and how you will verify it. Then stop and wait. Do not start coding until the user replies `GO` — approval of the spec alone is not permission to code.
-- The package manager and project layout are not chosen yet; propose them in the spec before adding files.
-- When a toolchain is introduced, add its exact setup/build/test commands here (including how to run a single test) and remove the placeholder notice above.
+- **Every code change ships with tests.** Add unit tests for services and `Pilot` UI tests for interactions; use snapshot tests for layout changes (see `spec.md` §10). A change is not done until `uv run pytest` passes — state any untested behavior and why.
+- Use the `uv` + `src/` layout and commands above unless the user says otherwise.
