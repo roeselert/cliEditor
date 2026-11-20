@@ -247,7 +247,7 @@ class EditorApp(App[None]):
             editor = Editor.code_editor(
                 text=text,
                 language=language,
-                theme="css",
+                theme="monokai",
                 id=f"editor-{tab_id}",
             )
         except LanguageDoesNotExist:
@@ -256,7 +256,7 @@ class EditorApp(App[None]):
             editor = Editor(
                 text=text,
                 id=f"editor-{tab_id}",
-                theme="css",
+                theme="monokai",
                 show_line_numbers=True,
                 soft_wrap=False,
                 tab_behavior="indent",

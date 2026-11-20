@@ -132,8 +132,7 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 
 - Tree default width: 34 cells (session-restored). The divider is fixed; draggable resizing is deferred.
 - If terminal is smaller than 20×20, replace the layout with a centered "Terminal too small" message; restore the layout when the terminal grows. Portrait and landscape terminals are both supported; portrait mode uses a slightly narrower tree and shorter output panel.
-- Dark theme by default. `TextArea.code_editor(..., theme="css", show_line_numbers=True, soft_wrap=False, tab_behavior="indent")`.
-- All major UI surfaces use explicit near-black colors (`#121212`, modals `#181818`) instead of Textual theme-variable panels, to avoid washed-out grey bars.
+- Dark theme by default. `TextArea.code_editor(..., theme="monokai", show_line_numbers=True, soft_wrap=False, tab_behavior="indent")`.
 - If tree-sitter support is missing, open the file as plain text instead of failing.
 - TCSS defines borders, focus accent, status bar, find bar, and modal styling.
 
@@ -249,7 +248,7 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 
 ### 8.4 Editing
 
-- `Editor` is a `TextArea` subclass created with `Editor.code_editor(text=..., language=..., theme="css", show_line_numbers=True, soft_wrap=False, tab_behavior="indent")`. The editor keeps a visible vertical scrollbar and supports mouse-wheel/touch scrolling.
+- `Editor` is a `TextArea` subclass created with `Editor.code_editor(text=..., language=..., theme="monokai", show_line_numbers=True, soft_wrap=False, tab_behavior="indent")`. The editor keeps visible vertical and horizontal scrollbars and supports mouse-wheel/touch scrolling.
 - Language by extension:
 
 | Extension | Language |

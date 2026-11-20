@@ -30,8 +30,9 @@ class Editor(TextArea):
         return bool(getattr(self.app, "mark_mode", False))
 
     def on_mount(self) -> None:
-        # Keep the vertical scrollbar available for mouse/touch scrolling.
+        # Keep vertical and horizontal scrollbars available for mouse/touch scrolling.
         self.show_vertical_scrollbar = True
+        self.show_horizontal_scrollbar = True
 
     def action_cursor_up(self, select: bool = False) -> None:
         super().action_cursor_up(select or self.marking)

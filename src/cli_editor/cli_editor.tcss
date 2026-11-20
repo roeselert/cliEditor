@@ -1,29 +1,15 @@
 Screen {
     layout: vertical;
-    background: #121212;
 }
 
 #main {
     height: 1fr;
-    background: #121212;
 }
 
 #tree-pane {
     width: 34;
     min-width: 20;
-    background: #121212;
     border-right: solid $primary;
-}
-
-DirectoryTree,
-Tree {
-    background: #121212;
-    color: #e6e6e6;
-}
-
-DirectoryTree > .tree--cursor,
-Tree > .tree--cursor {
-    background: #1a1a1a;
 }
 
 #tree-pane #tree-filter {
@@ -38,59 +24,37 @@ Tree > .tree--cursor {
 #right {
     width: 1fr;
     height: 1fr;
-    background: #121212;
 }
 
 #editor-area {
     height: 1fr;
-    background: #121212;
 }
 
 #tabs {
     height: 3;
 }
 
-#tabs,
-Tabs,
-Tab,
-ContentTabs {
-    background: #121212;
-}
-
 #editors {
     height: 1fr;
-    background: #121212;
 }
 
 #editors Editor {
-    background: #121212;
-    color: #e6e6e6;
     overflow-y: scroll;
+    overflow-x: scroll;
     scrollbar-size-vertical: 2;
-}
-
-#editors Editor .text-area--gutter,
-#editors Editor .text-area--cursor-gutter,
-#editors Editor .text-area--cursor-line {
-    background: #121212;
+    scrollbar-size-horizontal: 1;
 }
 
 .empty-editor {
     width: 1fr;
     height: 1fr;
     content-align: center middle;
-    background: #121212;
     color: $text-muted;
-}
-
-ModalScreen {
-    background: #121212;
 }
 
 #find-bar {
     height: 3;
     dock: bottom;
-    background: #121212;
 }
 
 #find-bar #find-input {
@@ -104,40 +68,30 @@ ModalScreen {
 
 #output-pane {
     height: 12;
-    background: #121212;
     border-top: solid $primary;
 }
 
 #output-title {
     height: 1;
     padding: 0 1;
-    background: #121212;
-    color: #888888;
+    background: $panel;
+    color: $text-muted;
 }
 
 #output {
     height: 1fr;
     padding: 0 1;
-    background: #121212;
 }
 
 #status-bar {
     height: 1;
     padding: 0 1;
-    background: #121212;
-    color: #888888;
+    background: $panel;
+    color: $text-muted;
 }
 
 Footer {
     height: 1;
-    background: #121212;
-    color: #888888;
-}
-
-FooterKey,
-Footer .footer-key--key,
-Footer .footer-key--description {
-    background: #121212;
 }
 
 .modal-box {
@@ -146,7 +100,7 @@ Footer .footer-key--description {
     max-height: 80%;
     padding: 1 2;
     border: round $primary;
-    background: #181818;
+    background: $surface;
 }
 
 .modal-box.wide {
@@ -180,7 +134,7 @@ Footer .footer-key--description {
     height: 85%;
     padding: 1 2;
     border: round $primary;
-    background: #181818;
+    background: $surface;
 }
 
 #keymap-text {
