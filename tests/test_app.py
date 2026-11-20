@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from textual.widgets import Input, RichLog, Static, Tab
+from textual import events
+from textual.widgets import Footer, Input, RichLog, Static, Tab, Tabs
 
 from cli_editor.app import EditorApp
 from cli_editor.widgets.keymap_overlay import KeymapScreen
@@ -79,11 +80,84 @@ async def test_editor_background_is_dark(tmp_path: Path) -> None:
         assert tree_background.a == 1
         assert max(tree_background.rgb) < 60
 
+        tree_color = app.tree_pane.tree.styles.color
+        assert tree_color is not None
+        assert max(tree_color.rgb) > 180
+
+        status_background = app.query_one("#status-bar", Static).styles.background
+        assert status_background is not None
+        assert status_background.a == 1
+        assert max(status_background.rgb) < 60
+
+        output_title_background = app.query_one("#output-title", Static).styles.background
+        assert output_title_background is not None
+        assert output_title_background.a == 1
+        assert max(output_title_background.rgb) < 60
+
+        footer_background = app.query_one(Footer).styles.background
+        assert footer_background is not None
+        assert footer_background.a == 1
+        assert max(footer_background.rgb) < 60
+
+        tabs_background = app.query_one(Tabs).styles.background
+        assert tabs_background is not None
+        assert tabs_background.a == 1
+        assert max(tabs_background.rgb) < 60
+
+        tab_background = app.query_one(Tab).styles.background
+        assert tab_background is not None
+        assert tab_background.a == 1
+        assert max(tab_background.rgb) < 60
+
         await pilot.press("ctrl+k")
         await pilot.pause()
         modal_background = app.screen.styles.background
         assert modal_background is not None
         assert modal_background.a == 1
+
+        keymap_background = app.screen.query_one("#keymap-container").styles.background
+        assert keymap_background is not None
+        assert keymap_background.a == 1
+        assert max(keymap_background.rgb) < 40
+
+        await pilot.press("escape")
+        await pilot.pause()
+        await pilot.press("ctrl+n")
+        await pilot.pause()
+        assert isinstance(app.screen, PromptScreen)
+        prompt_background = app.screen.query_one(".modal-box").styles.background
+        assert prompt_background is not None
+        assert prompt_background.a == 1
+        assert max(prompt_background.rgb) < 40
+
+
+async def test_editor_vertical_scrolling(tmp_path: Path) -> None:
+    path = tmp_path / "long.py"
+    path.write_text("\n".join(f"line {index}" for index in range(100)) + "\n", encoding="utf-8")
+    app = await start_app(tmp_path)
+    async with app.run_test(size=(100, 25)) as pilot:
+        await pilot.pause()
+        editor = await app.open_path(path)
+        assert editor is not None
+        await pilot.pause()
+
+        assert editor.show_vertical_scrollbar is True
+        assert editor.styles.overflow_y == "scroll"
+        assert editor.styles.scrollbar_size_vertical >= 1
+
+        before = editor.scroll_offset.y
+        editor.post_message(
+            events.MouseScrollDown(editor, 10, 5, 0, 3, 0, False, False, False)
+        )
+        await pilot.pause()
+        assert editor.scroll_offset.y > before
+
+        scrolled = editor.scroll_offset.y
+        editor.post_message(
+            events.MouseScrollUp(editor, 10, 5, 0, -3, 0, False, False, False)
+        )
+        await pilot.pause()
+        assert editor.scroll_offset.y < scrolled
 
 
 async def test_open_all_mvp_languages(tmp_path: Path) -> None:

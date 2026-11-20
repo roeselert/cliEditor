@@ -49,7 +49,7 @@ uv run ruff check .
 ## Layout
 
 - **File tree** — left pane; arrow keys navigate, `Enter` opens a file or toggles a directory.
-- **Editor** — right pane, one tab per open file. A `●` on the tab means unsaved changes. The editor uses the standard Textual `css` syntax theme, which is less bright than the previous VS Code Dark palette.
+- **Editor** — right pane, one tab per open file. A `●` on the tab means unsaved changes. The editor uses the standard Textual `css` syntax theme, which is less bright than the previous VS Code Dark palette. A vertical scrollbar is always available for mouse/touch scrolling. All panes use an explicit near-black palette (`#121212`, modals `#181818`) rather than Textual theme-variable panels.
 - **Output panel** — bottom pane for `Ctrl-R` run results; hidden until something runs.
 - **Status bar** — path, language, dirty/mark state, run status, and cursor position.
 - Click the tree, a tab, or the editor to focus that pane.

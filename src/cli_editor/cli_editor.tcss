@@ -15,9 +15,15 @@ Screen {
     border-right: solid $primary;
 }
 
-#tree-pane DirectoryTree,
-#tree-pane Tree {
+DirectoryTree,
+Tree {
     background: #121212;
+    color: #e6e6e6;
+}
+
+DirectoryTree > .tree--cursor,
+Tree > .tree--cursor {
+    background: #1a1a1a;
 }
 
 #tree-pane #tree-filter {
@@ -42,6 +48,12 @@ Screen {
 
 #tabs {
     height: 3;
+}
+
+#tabs,
+Tabs,
+Tab,
+ContentTabs {
     background: #121212;
 }
 
@@ -53,6 +65,14 @@ Screen {
 #editors Editor {
     background: #121212;
     color: #e6e6e6;
+    overflow-y: scroll;
+    scrollbar-size-vertical: 2;
+}
+
+#editors Editor .text-area--gutter,
+#editors Editor .text-area--cursor-gutter,
+#editors Editor .text-area--cursor-line {
+    background: #121212;
 }
 
 .empty-editor {
@@ -91,8 +111,8 @@ ModalScreen {
 #output-title {
     height: 1;
     padding: 0 1;
-    background: $panel;
-    color: $text-muted;
+    background: #121212;
+    color: #888888;
 }
 
 #output {
@@ -104,12 +124,20 @@ ModalScreen {
 #status-bar {
     height: 1;
     padding: 0 1;
-    background: $panel;
-    color: $text-muted;
+    background: #121212;
+    color: #888888;
 }
 
 Footer {
     height: 1;
+    background: #121212;
+    color: #888888;
+}
+
+FooterKey,
+Footer .footer-key--key,
+Footer .footer-key--description {
+    background: #121212;
 }
 
 .modal-box {
@@ -118,7 +146,7 @@ Footer {
     max-height: 80%;
     padding: 1 2;
     border: round $primary;
-    background: $surface;
+    background: #181818;
 }
 
 .modal-box.wide {
@@ -152,7 +180,7 @@ Footer {
     height: 85%;
     padding: 1 2;
     border: round $primary;
-    background: $surface;
+    background: #181818;
 }
 
 #keymap-text {
