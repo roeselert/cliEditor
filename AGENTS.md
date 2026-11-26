@@ -26,11 +26,12 @@ uv run pytest                                # full suite
 uv run pytest tests/test_app.py::test_open_save_and_dirty_tab  # single test
 uv run pytest --snapshot-update              # only after reviewing snapshots
 uv run ruff check .
+uv run pyinstaller --clean --noconfirm packaging/clieditor.spec  # standalone binary
 ```
 
 ## Repo state
 
-Implemented MVP: `src/cli_editor/` contains the app, widgets, services, TCSS, and entry point; `tests/` contains unit, Pilot UI, and snapshot tests; `pyproject.toml` + `uv.lock` define the toolchain. `README.md` is the user-facing feature/keymap overview and `spec.md` is the implementation spec. No CI or `opencode.json` yet.
+Implemented MVP: `src/cli_editor/` contains the app, widgets, services, TCSS, and entry point; `tests/` contains unit, Pilot UI, and snapshot tests; `pyproject.toml` + `uv.lock` define the toolchain. `README.md` is the user-facing feature/keymap overview and `spec.md` is the implementation spec. `.github/workflows/build.yml` runs lint/tests and builds the onefile binary; `packaging/` holds the PyInstaller spec and frozen entry point. No `opencode.json` yet.
 
 ## Working here
 

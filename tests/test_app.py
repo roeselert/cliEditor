@@ -162,6 +162,17 @@ async def test_open_all_mvp_languages(tmp_path: Path) -> None:
             assert app.buffers[path].language == language
 
 
+async def test_update_status_survives_unmounted_dom(tmp_path: Path) -> None:
+    # Queued TabActivated/Changed messages can be delivered during shutdown,
+    # after the EditorArea has been removed. Status updates must not raise.
+    app = await start_app(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        app.editor_area.remove()
+        await pilot.pause()
+        app.update_status()
+
+
 async def test_tabs_switch_and_close(tmp_path: Path) -> None:
     first = tmp_path / "a.py"
     second = tmp_path / "b.py"

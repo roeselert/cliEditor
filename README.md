@@ -27,6 +27,18 @@ Options:
 - `--hidden` — show dotfiles in the file tree.
 - `--no-session` — don't restore or save the previous session.
 
+### Standalone binary (Linux x86_64)
+
+Every release publishes a single self-contained executable that bundles Python, Textual, and the syntax grammars — no Python or `uv` required on the target machine.
+
+```bash
+curl -fL -o clieditor https://github.com/roeselert/cliEditor/releases/latest/download/clieditor-linux-x86_64
+chmod +x clieditor
+./clieditor /path/to/project
+```
+
+Pushing a `v*` tag builds the binary and attaches it to the GitHub release. Pushes to `main` and pull requests also build it as a workflow artifact.
+
 Development loop:
 
 ```bash

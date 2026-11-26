@@ -22,7 +22,7 @@ No LSP, autocomplete, multi-cursor, plugins, Git integration, embedded terminal,
 - Python 3.11+
 - [Textual](https://textual.textualize.io/) with the `syntax` extra: `textual[syntax]`
 - `platformdirs` for the session file
-- Dev: `textual-dev`, `pytest`, `pytest-asyncio`, `pytest-textual-snapshot`, `ruff`
+- Dev: `textual-dev`, `pytest`, `pytest-asyncio`, `pytest-textual-snapshot`, `ruff`, `pyinstaller`
 
 Packaging: `uv` + `pyproject.toml` (hatchling backend), `src/` layout. Declare a console script:
 
@@ -36,6 +36,10 @@ Pin the Textual version actually used in `pyproject.toml`; do not rely on "lates
 ## 4. Project layout
 
 ```text
+.github/workflows/build.yml  # test, lint, and onefile binary build/release
+packaging/
+  cli_editor_entry.py    # entry point used by the frozen build
+  clieditor.spec         # PyInstaller onefile spec
 pyproject.toml
 README.md
 spec.md
@@ -67,6 +71,7 @@ tests/
   test_runner.py
   test_app.py            # Pilot UI tests
   test_snapshots.py
+  test_packaging.py      # frozen build inputs
 ```
 
 ## 5. Entry point and startup
@@ -425,3 +430,14 @@ Required coverage:
 - Draggable tree/editor divider and configurable pane width: deferred.
 - Find options (case-sensitive, whole word, regex): deferred.
 - Regex/case/whole-word options for search: deferred.
+
+## 14. Packaging and CI
+
+- `packaging/clieditor.spec` builds a self-contained Linux x86_64 executable with PyInstaller's onefile mode. It bundles `collect_all("textual")` (TCSS themes, dynamic modules), the app stylesheet at `cli_editor/cli_editor.tcss`, and hidden imports for `tree_sitter_python`, `tree_sitter_javascript`, `tree_sitter_html`, and `tree_sitter_css` (Textual loads grammars through `importlib`).
+- `packaging/cli_editor_entry.py` is the frozen entry point; it calls `cli_editor.app:main`.
+- `.github/workflows/build.yml` runs on pushes to `main`, `v*` tags, pull requests, and manual dispatch:
+  - **test** job: `uv sync --frozen`, `ruff check .`, `pytest`.
+  - **build** job: PyInstaller, `./dist/clieditor --help` smoke test, artifact upload as `clieditor-linux-x86_64`.
+  - Tag builds publish the asset to the matching GitHub release (`gh release create`/`upload --clobber`), so `https://github.com/<owner>/<repo>/releases/latest/download/clieditor-linux-x86_64` works with `curl`.
+- Downloads need `chmod +x` because HTTP does not preserve the executable bit.
+- macOS/Windows builds and code signing are deferred.

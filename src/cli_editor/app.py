@@ -182,7 +182,12 @@ class EditorApp(App[None]):
         return len(self.screen_stack) > 1
 
     def update_status(self) -> None:
-        editor = self.editor_area.active_editor
+        try:
+            editor = self.editor_area.active_editor
+        except NoMatches:
+            # A queued TabActivated/Changed message can arrive after the DOM is
+            # torn down during shutdown; there is no status left to update.
+            return
         path = self.active_path
         language = self.buffers[path].language if path in self.buffers else None
         dirty = self.is_dirty(path) if path else False
@@ -730,7 +735,11 @@ class EditorApp(App[None]):
 
     @on(Editor.SelectionChanged)
     def selection_changed(self, event: Editor.SelectionChanged) -> None:
-        if event.text_area is self.editor_area.active_editor:
+        try:
+            active_editor = self.editor_area.active_editor
+        except NoMatches:
+            return
+        if event.text_area is active_editor:
             self.update_status()
 
     @on(Tabs.TabActivated)

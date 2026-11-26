@@ -1,0 +1,63 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run pytest -q
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Build standalone binary
+        run: uv run pyinstaller --clean --noconfirm packaging/clieditor.spec
+      - name: Smoke test
+        run: ./dist/clieditor --help
+      - name: Rename artifact
+        run: mv dist/clieditor dist/clieditor-linux-x86_64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clieditor-linux-x86_64
+          path: dist/clieditor-linux-x86_64
+          if-no-files-found: error
+      - name: Publish release asset
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/clieditor-linux-x86_64 --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/clieditor-linux-x86_64 \
+              --title "$GITHUB_REF_NAME" --generate-notes
+          fi
