@@ -49,7 +49,8 @@ class EditorApp(App[None]):
         Binding("ctrl+s", "save", "Save", priority=True),
         Binding("ctrl+shift+s", "save_as", "Save as", priority=True),
         Binding("f4", "save_as", "Save as", show=False),
-        Binding("ctrl+w", "close_tab", "Close tab", priority=True),
+        Binding("ctrl+w", "toggle_wrap", "Wrap", priority=True),
+        Binding("ctrl+t,alt+w,ctrl+shift+w", "close_tab", "Close tab", priority=True),
         Binding("ctrl+tab", "next_tab", "Next tab", priority=True),
         Binding("ctrl+shift+tab", "previous_tab", "Previous tab", priority=True),
         Binding("alt+right", "next_tab", "Next tab", show=False),
@@ -89,6 +90,7 @@ class EditorApp(App[None]):
         self.active_path: Path | None = None
         self._tab_counter = 0
         self.mark_mode = False
+        self.line_wrap = False
         self.mark_anchor: tuple[int, int] = (0, 0)
         self.run_status = ""
         self.runner = Runner(self._run_line, self._run_done)
@@ -196,6 +198,7 @@ class EditorApp(App[None]):
             language=language,
             dirty=dirty,
             mark_mode=self.mark_mode,
+            wrap=self.line_wrap,
             run_status=self.run_status,
             row=row,
             column=column,
@@ -248,6 +251,7 @@ class EditorApp(App[None]):
                 text=text,
                 language=language,
                 theme="monokai",
+                soft_wrap=self.line_wrap,
                 id=f"editor-{tab_id}",
             )
         except LanguageDoesNotExist:
@@ -258,9 +262,10 @@ class EditorApp(App[None]):
                 id=f"editor-{tab_id}",
                 theme="monokai",
                 show_line_numbers=True,
-                soft_wrap=False,
+                soft_wrap=self.line_wrap,
                 tab_behavior="indent",
             )
+        editor.styles.overflow_x = "hidden" if self.line_wrap else "scroll"
         buffer = BufferState(
             path=path,
             language=language,
@@ -449,6 +454,19 @@ class EditorApp(App[None]):
         self.update_status()
         self.persist_session()
         self.tree_pane.refresh_tree()
+
+    def action_toggle_wrap(self) -> None:
+        if self.modal_open:
+            return
+        self.line_wrap = not self.line_wrap
+        overflow_x = "hidden" if self.line_wrap else "scroll"
+        for editor in self.editor_paths:
+            editor.soft_wrap = self.line_wrap
+            editor.styles.overflow_x = overflow_x
+        active = self.editor_area.active_editor
+        if active is not None:
+            active.scroll_cursor_visible()
+        self.update_status()
 
     @work(exclusive=False)
     async def action_close_tab(self) -> None:

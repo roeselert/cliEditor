@@ -19,6 +19,7 @@ class StatusBar(Static):
         language: str | None,
         dirty: bool,
         mark_mode: bool,
+        wrap: bool,
         run_status: str,
         row: int,
         column: int,
@@ -29,6 +30,8 @@ class StatusBar(Static):
         else:
             parts.append("No file")
         parts.append(LANGUAGE_LABELS.get(language, "Plain Text"))
+        if wrap:
+            parts.append("WRAP")
         if mark_mode:
             parts.append("MARK")
         if run_status:

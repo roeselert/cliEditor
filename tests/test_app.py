@@ -178,15 +178,76 @@ async def test_tabs_switch_and_close(tmp_path: Path) -> None:
         await pilot.pause()
         assert app.active_path == first
 
-        await pilot.press("ctrl+w")
+        await pilot.press("ctrl+t")
         await pilot.pause()
         assert app.editor_area.tab_ids == ["file-2"]
         assert app.active_path == second
 
-        await pilot.press("ctrl+w")
+        await pilot.press("ctrl+t")
         await pilot.pause()
         assert app.editor_area.tab_ids == []
         assert app.active_path is None
+
+
+async def test_ctrl_w_toggles_line_wrap(tmp_path: Path) -> None:
+    path = tmp_path / "a.py"
+    path.write_text("x" * 200 + "\n", encoding="utf-8")
+    app = await start_app(tmp_path)
+    async with app.run_test(size=(100, 25)) as pilot:
+        await pilot.pause()
+        editor = await app.open_path(path)
+        assert editor is not None
+        await pilot.pause()
+
+        assert editor.soft_wrap is False
+        assert editor.styles.overflow_x == "scroll"
+        assert app.line_wrap is False
+
+        await pilot.press("ctrl+w")
+        await pilot.pause()
+        assert editor.soft_wrap is True
+        assert editor.styles.overflow_x == "hidden"
+        assert app.line_wrap is True
+        assert app.editor_area.tab_ids == ["file-1"]
+        assert "WRAP" in str(app.status_bar.content)
+
+        second = tmp_path / "b.py"
+        second.write_text("y\n", encoding="utf-8")
+        second_editor = await app.open_path(second)
+        assert second_editor is not None
+        await pilot.pause()
+        assert second_editor.soft_wrap is True
+        assert second_editor.styles.overflow_x == "hidden"
+
+        await pilot.press("ctrl+w")
+        await pilot.pause()
+        assert editor.soft_wrap is False
+        assert editor.styles.overflow_x == "scroll"
+        assert second_editor.soft_wrap is False
+        assert second_editor.styles.overflow_x == "scroll"
+        assert app.line_wrap is False
+        assert "WRAP" not in str(app.status_bar.content)
+
+
+async def test_inactive_tab_text_is_readable(tmp_path: Path) -> None:
+    first = tmp_path / "a.py"
+    second = tmp_path / "b.py"
+    first.write_text("a\n", encoding="utf-8")
+    second.write_text("b\n", encoding="utf-8")
+    app = await start_app(tmp_path)
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.pause()
+        await app.open_path(first)
+        await app.open_path(second)
+        await pilot.pause()
+
+        tabs = app.editor_area.tabs
+        inactive = tabs.get_tab("file-1")
+        active = tabs.get_tab("file-2")
+        assert inactive is not None
+        assert active is not None
+        assert inactive.rich_style.color == active.rich_style.color
+        assert inactive.rich_style.bgcolor != active.rich_style.bgcolor
 
 
 async def test_find_bar_cycles_matches(tmp_path: Path) -> None:
@@ -292,6 +353,48 @@ async def test_tree_enter_and_filter_open_files(tmp_path: Path) -> None:
         await pilot.pause()
         assert app.active_path == second
         assert app.tree_pane.filter_visible is False
+
+
+async def test_tree_right_expands_and_left_collapses(tmp_path: Path) -> None:
+    subdir = tmp_path / "sub"
+    subdir.mkdir()
+    (subdir / "x.py").write_text("x\n", encoding="utf-8")
+    (tmp_path / "a.py").write_text("a\n", encoding="utf-8")
+    app = await start_app(tmp_path)
+    async with app.run_test(size=(100, 30)) as pilot:
+        await pilot.pause()
+        tree = app.tree_pane.tree
+        tree.focus()
+        await pilot.pause()
+
+        await pilot.press("down")
+        await pilot.pause()
+        node = tree.cursor_node
+        assert node is not None
+        assert str(node.label) == "sub"
+        assert node.allow_expand is True
+        assert node.is_expanded is False
+
+        await pilot.press("right")
+        await pilot.pause()
+        assert node.is_expanded is True
+
+        await pilot.press("left")
+        await pilot.pause()
+        assert node.is_expanded is False
+
+        # A file is not a branch, so both arrows are no-ops.
+        file_node = next(
+            child
+            for child in tree.root.children
+            if getattr(child.data, "path", None) == tmp_path / "a.py"
+        )
+        tree.move_cursor(file_node)
+        await pilot.press("left")
+        await pilot.press("right")
+        await pilot.pause()
+        assert tree.cursor_node is file_node
+        assert file_node.is_expanded is False
 
 
 async def test_quick_open(tmp_path: Path) -> None:
@@ -468,7 +571,7 @@ async def test_dirty_close_prompts(tmp_path: Path) -> None:
         editor.insert("y")
         await pilot.pause()
 
-        await pilot.press("ctrl+w")
+        await pilot.press("ctrl+t")
         await pilot.pause()
         assert isinstance(app.screen, UnsavedScreen)
         await pilot.press("escape")
@@ -476,7 +579,7 @@ async def test_dirty_close_prompts(tmp_path: Path) -> None:
         assert app.editor_area.tab_ids == ["file-1"]
         assert app.is_dirty(path)
 
-        await pilot.press("ctrl+w")
+        await pilot.press("alt+w")
         await pilot.pause()
         await pilot.press("s")
         await pilot.pause()

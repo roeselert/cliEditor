@@ -132,7 +132,7 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 
 - Tree default width: 34 cells (session-restored). The divider is fixed; draggable resizing is deferred.
 - If terminal is smaller than 20×20, replace the layout with a centered "Terminal too small" message; restore the layout when the terminal grows. Portrait and landscape terminals are both supported; portrait mode uses a slightly narrower tree and shorter output panel.
-- Dark theme by default. `TextArea.code_editor(..., theme="monokai", show_line_numbers=True, soft_wrap=False, tab_behavior="indent")`.
+- Dark theme by default. `TextArea.code_editor(..., theme="monokai", show_line_numbers=True, soft_wrap=<app line-wrap state>, tab_behavior="indent")`. Line wrap defaults to off and is toggled with `Ctrl-W`.
 - If tree-sitter support is missing, open the file as plain text instead of failing.
 - TCSS defines borders, focus accent, status bar, find bar, and modal styling.
 
@@ -160,7 +160,8 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 | `Ctrl-P` | Quick open (fuzzy file finder) | yes |
 | `Ctrl-S` | Save active file | yes |
 | `Ctrl-Shift-S` | Save As (fallback `F4`) | yes |
-| `Ctrl-W` | Close active tab | yes |
+| `Ctrl-W` | Toggle line wrap | yes |
+| `Ctrl-T` / `Alt-W` / `Ctrl-Shift-W` | Close active tab | yes |
 | `Ctrl-Tab` / `Ctrl-Shift-Tab` | Next/previous tab (fallback `Alt-Right`/`Alt-Left`) | yes |
 | `Ctrl-R` | Run active file | yes |
 | `Esc` | Stop running file / cancel mark mode | no (Editor handles it directly) |
@@ -186,14 +187,15 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 | `Home` / `End` | Line start / line end |
 | `Alt-K` | Delete to end of line (moved off `Ctrl-K`) |
 | `Ctrl-Backspace` | Delete word left (keep working after `Ctrl-W` is taken) |
+| `Ctrl-W` | Toggle line wrap (all open editors) |
 
 ### File tree
 
 | Key | Action |
 | --- | --- |
 | `Up` / `Down` | Move selection |
-| `Right` | Expand branch |
-| `Left` | Collapse branch / go to parent |
+| `Right` | Open (expand) branch |
+| `Left` | Close (collapse) branch |
 | `Enter` | Open file, or toggle directory |
 | `Ctrl-F` | Focus the tree filter |
 | `Home` / `End` | First/last item |
@@ -207,8 +209,8 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 - Remove or override the app-level `Ctrl-C` "help quit" binding so it never fires while editing.
 - Rebind TextArea's `ctrl+k` (delete to EOL) to `alt+k` in the `Editor` subclass.
 - Override `ctrl+a` in `Editor` to call `action_select_all`; `Home` still moves to line start.
-- `Ctrl-W` closes tabs globally. TextArea's word-delete remains available via `Ctrl-Backspace`.
-- `Ctrl-Shift-S` and `Ctrl-Shift-F` require a terminal that reports modified keys (Kitty, WezTerm, Ghostty, recent iTerm2). Keep `F4`/`F3` fallbacks bound.
+- `Ctrl-W` toggles soft wrap globally; close tabs with `Ctrl-T` (fallback `Alt-W` / `Ctrl-Shift-W`). TextArea's word-delete remains available via `Ctrl-Backspace`.
+- `Ctrl-Shift-S`, `Ctrl-Shift-F`, and `Ctrl-Shift-W` require a terminal that reports modified keys (Kitty, WezTerm, Ghostty, recent iTerm2). Keep `F4`/`F3`/`Alt-W` fallbacks bound; `Ctrl-T` does not require modified-key reporting.
 - Avoid `Ctrl-M` (= `Enter`), `Ctrl-I` (= `Tab`), `Ctrl-J` (= newline), `Ctrl-H` (= Backspace).
 
 ## 8. Feature behavior
@@ -248,7 +250,8 @@ Use `Tabs` + `ContentSwitcher` directly (not `TabbedContent`) so tabs can be add
 
 ### 8.4 Editing
 
-- `Editor` is a `TextArea` subclass created with `Editor.code_editor(text=..., language=..., theme="monokai", show_line_numbers=True, soft_wrap=False, tab_behavior="indent")`. The editor keeps visible vertical and horizontal scrollbars and supports mouse-wheel/touch scrolling.
+- `Editor` is a `TextArea` subclass created with `Editor.code_editor(text=..., language=..., theme="monokai", show_line_numbers=True, soft_wrap=<app line-wrap state>, tab_behavior="indent")`. The editor keeps visible vertical and horizontal scrollbars and supports mouse-wheel/touch scrolling.
+- `Ctrl-W` toggles line wrap app-wide: every open editor and any file opened afterwards gets the new state. Wrapping hides the horizontal scrollbar (`overflow-x: hidden`) and the status bar shows `WRAP`; turning it off restores the scrollbar (`overflow-x: scroll`).
 - Language by extension:
 
 | Extension | Language |
@@ -391,7 +394,7 @@ Required coverage:
 2. Opening `.py`, `.js`, `.html`, and `.css` files shows correct highlighting and line numbers.
 3. `Ctrl-S` writes changes; the dirty dot appears and clears correctly.
 4. New, open, save-as, rename, and delete all work with confirmations and error handling.
-5. Tabs preserve cursor, scroll, and undo history; `Ctrl-W` prompts on dirty buffers.
+5. Tabs preserve cursor, scroll, and undo history; `Ctrl-T`/`Alt-W` prompt on dirty buffers.
 6. `Ctrl-F` finds and selects matches with wrap-around; `Ctrl-Shift-F` searches the project.
 7. `Ctrl-P` opens files by fuzzy name; `Ctrl-K` shows the keymap.
 8. `Ctrl-R` runs Python/JavaScript, streams output, and `Esc` stops it.

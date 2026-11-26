@@ -32,6 +32,24 @@ Screen {
 
 #tabs {
     height: 3;
+    background: $panel;
+}
+
+#tabs Tab {
+    color: $foreground;
+    background: $panel;
+}
+
+#tabs Tab.-active {
+    color: $foreground;
+    background: $surface;
+    text-style: bold;
+}
+
+#tabs:focus Tab.-active {
+    color: $block-cursor-foreground;
+    background: $block-cursor-background;
+    text-style: $block-cursor-text-style;
 }
 
 #editors {

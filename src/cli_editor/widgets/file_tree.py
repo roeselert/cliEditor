@@ -5,11 +5,35 @@ from __future__ import annotations
 from pathlib import Path
 
 from textual import events, on
+from textual.binding import Binding
 from textual.containers import Container
 from textual.widgets import DirectoryTree, Input, Tree
 
 from ..services.files import iter_files
 from .input import PromptInput
+
+
+class ProjectTree(DirectoryTree):
+    """Directory tree with Right to expand and Left to collapse a branch."""
+
+    BINDINGS = [
+        binding
+        for binding in DirectoryTree.BINDINGS
+        if getattr(binding, "key", None) not in {"left", "right"}
+    ] + [
+        Binding("right", "expand_cursor", "Open branch", show=False),
+        Binding("left", "collapse_cursor", "Close branch", show=False),
+    ]
+
+    def action_expand_cursor(self) -> None:
+        node = self.cursor_node
+        if node is not None and node.allow_expand and not node.is_expanded:
+            node.expand()
+
+    def action_collapse_cursor(self) -> None:
+        node = self.cursor_node
+        if node is not None and node.allow_expand and node.is_expanded:
+            node.collapse()
 
 
 class FileTreePane(Container):
@@ -23,7 +47,7 @@ class FileTreePane(Container):
 
     def compose(self):
         yield PromptInput(placeholder="Filter files…", id="tree-filter")
-        yield DirectoryTree(self.root_path, id="tree")
+        yield ProjectTree(self.root_path, id="tree")
         filter_tree: Tree[Path] = Tree("Matches", id="filter-tree")
         filter_tree.show_root = False
         yield filter_tree
@@ -33,8 +57,8 @@ class FileTreePane(Container):
         self.query_one("#filter-tree", Tree).display = False
 
     @property
-    def tree(self) -> DirectoryTree:
-        return self.query_one("#tree", DirectoryTree)
+    def tree(self) -> ProjectTree:
+        return self.query_one("#tree", ProjectTree)
 
     @property
     def filter_tree(self) -> Tree[Path]:

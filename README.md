@@ -67,7 +67,8 @@ uv run ruff check .
 | `Ctrl-P` | Quick open (fuzzy file finder) |
 | `Ctrl-S` | Save |
 | `Ctrl-Shift-S` / `F4` | Save As |
-| `Ctrl-W` | Close current tab |
+| `Ctrl-W` | Toggle line wrap (applies to all open editors) |
+| `Ctrl-T` / `Alt-W` / `Ctrl-Shift-W` | Close current tab |
 | `Ctrl-Tab` / `Ctrl-Shift-Tab` | Next / previous tab (`Alt-Right` / `Alt-Left` fallback) |
 | `Ctrl-R` | Run current file |
 | `Esc` | Stop a running file |
@@ -92,14 +93,15 @@ uv run ruff check .
 | `Shift` + arrows | Extend selection |
 | `Home` / `End` | Line start / line end |
 | `Alt-K` | Delete to end of line |
+| `Ctrl-W` | Toggle line wrap |
 
 ### File tree
 
 | Key | Action |
 | --- | --- |
 | `Up` / `Down` | Move selection |
-| `Right` | Expand branch |
-| `Left` | Collapse branch / go to parent |
+| `Right` | Open (expand) branch |
+| `Left` | Close (collapse) branch |
 | `Enter` | Open file, or toggle directory |
 | `Ctrl-F` | Filter files by name |
 | `Home` / `End` | First / last item |
@@ -141,11 +143,11 @@ Output streams into the panel line by line. `Esc` stops the process (and its pro
 
 - **`Ctrl-M` is `Enter`.** Terminals send the same byte (`0x0D`) for both, so mark mode uses `Ctrl-Space` instead.
 - **`Ctrl-K`** normally deletes to end of line in `TextArea`; that moves to `Alt-K` so `Ctrl-K` can open the keymap.
-- **`Ctrl-W`** normally deletes a word in `TextArea`; closing tabs takes it. `Ctrl-Backspace` and `Alt-Backspace` still delete a word.
+- **`Ctrl-W`** normally deletes a word in `TextArea`; it now toggles line wrap. Close tabs with `Ctrl-T` (or `Alt-W` / `Ctrl-Shift-W`). `Ctrl-Backspace` and `Alt-Backspace` still delete a word.
 - **`Ctrl-A`** normally goes to line start in `TextArea`; it now selects all. `Home` still goes to line start.
-- **`Ctrl-X`** is cut, not close. Close tabs with `Ctrl-W`.
+- **`Ctrl-X`** is cut, not close. Close tabs with `Ctrl-T`, `Alt-W`, or `Ctrl-Shift-W`.
 - **`Ctrl-C`** copies the editor selection; the terminal/Textual interrupt binding is not used while the editor has focus.
-- **`Ctrl-Shift-S` / `Ctrl-Shift-F`** need a terminal that reports modified keys (Kitty, WezTerm, Ghostty, recent iTerm2). `F4` / `F3` are fallbacks.
+- **`Ctrl-Shift-S` / `Ctrl-Shift-F` / `Ctrl-Shift-W`** need a terminal that reports modified keys (Kitty, WezTerm, Ghostty, recent iTerm2). `F4` / `F3` / `Alt-W` are fallbacks.
 - Avoid `Ctrl-I` (= `Tab`), `Ctrl-J` (= newline), and `Ctrl-H` (= Backspace); terminals cannot distinguish them from navigation keys.
 
 ## Deferred
